@@ -3,22 +3,22 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useParams } from "next/navigation";
 
-interface Invoice {
+type TInvoice = {
   id: string;
   amount: number;
   targetName: string;
   message: string;
   bkashNumber: string;
   status: string;
-}
+  transactionId?: string;
+};
 
 export default function PaymentPage() {
   const { id } = useParams();
-  const [invoice, setInvoice] = useState<Invoice | null>(null);
+  const [invoice, setInvoice] = useState<TInvoice | null>(null);
   const [paid, setPaid] = useState(false);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [txId, setTxId] = useState("");
 
   useEffect(() => {
     fetch(`/api/invoice/${id}`)
@@ -29,7 +29,7 @@ export default function PaymentPage() {
         }
         return res.json();
       })
-      .then((data: Invoice) => {
+      .then((data: TInvoice) => {
         if (data) {
           setInvoice(data);
           if (data.status === "PAID") {
@@ -55,17 +55,26 @@ export default function PaymentPage() {
       .substring(2, 12);
 
     try {
-      // Strictly update the database status to PAID
-      await fetch(`/api/invoice/${id}/paid`, { method: "POST" });
+      const response = await fetch(`/api/invoice/${id}/paid`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ txId: generatedTxId }),
+      });
+
+      if (!response.ok) throw new Error("Update failed");
+
+      const updatedRes = await fetch(`/api/invoice/${id}`);
+      const updatedData = await updatedRes.json();
+
+      setInvoice(updatedData);
 
       setTimeout(() => {
-        setTxId(generatedTxId);
-        setLoading(false);
         setPaid(true);
+        setLoading(false);
       }, 1500);
     } catch (err) {
-      console.error("Payment Confirmation Error:", err);
-      alert("Database sync failed. Try again.");
+      const msg = err instanceof Error ? err.message : "Sync failed";
+      alert(msg);
       setLoading(false);
     }
   };
@@ -103,7 +112,6 @@ export default function PaymentPage() {
                 </span>
               </div>
 
-              {/* NEW: Dedicated bKash Number Copy Section */}
               <div className="space-y-2">
                 <label className="text-xs font-bold text-zinc-400 uppercase">
                   Send Money To (bKash/Nagad)
@@ -116,7 +124,7 @@ export default function PaymentPage() {
                   />
                   <button
                     onClick={handleCopy}
-                    className="bg-zinc-900 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-zinc-700 transition"
+                    className={`bg-zinc-900 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-zinc-700 transition ${!copied && "cursor-pointer"} ${copied ? "bg-green-600 hover:bg-green-500" : ""}`}
                   >
                     {copied ? "Copied!" : "Copy"}
                   </button>
@@ -130,7 +138,7 @@ export default function PaymentPage() {
               <button
                 onClick={handlePayment}
                 disabled={loading}
-                className="w-full bg-[#E2136E] text-white font-bold py-4 rounded-xl hover:brightness-110 transition disabled:opacity-50"
+                className="w-full bg-[#E2136E] text-white font-bold py-4 rounded-xl hover:brightness-110 transition disabled:opacity-50 cursor-pointer"
               >
                 {loading ? "Updating Status..." : "Confirm Payment"}
               </button>
@@ -152,7 +160,7 @@ export default function PaymentPage() {
               ৳{invoice.amount} added to wallet.
             </p>
             <p className="mt-6 text-sm font-mono text-zinc-400 bg-zinc-50 p-2 rounded">
-              TxID: {txId}
+              TxID: {invoice.transactionId}
             </p>
           </motion.div>
         )}
