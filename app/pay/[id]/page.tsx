@@ -105,7 +105,7 @@ export default function PaymentPage() {
     const url = window.location.href;
     // Facebook sharer is the most reliable way to push to Messenger on mobile
     window.open(
-      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+      `fb-messenger://share/?link=${encodeURIComponent(url)}`,
       "_blank",
     );
   };
