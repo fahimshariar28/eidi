@@ -123,13 +123,14 @@ export default function Home() {
 
         {/* Disable button if auth isn't ready or form is loading */}
         <button
+          type="submit"
           disabled={loading || !isAuthReady}
-          className="w-full bg-black text-white font-bold py-4 rounded-xl hover:bg-zinc-800 transition cursor-pointer disabled:opacity-50 h-14 relative overflow-hidden"
+          className="w-full bg-black text-white font-bold rounded-xl hover:bg-zinc-800 transition cursor-pointer disabled:opacity-50 h-14 relative flex items-center justify-center overflow-hidden"
         >
           <AnimatePresence mode="wait">
             {!isAuthReady ? (
               <motion.span
-                key="init"
+                key="initializing"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -138,19 +139,19 @@ export default function Home() {
               </motion.span>
             ) : loading ? (
               <motion.div
-                key="loading"
-                initial={{ opacity: 0, y: 10 }}
+                key="loading-state"
+                initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="flex items-center justify-center gap-2"
+                exit={{ opacity: 0, y: -15 }}
+                className="flex items-center gap-2"
               >
-                {/* Simple CSS Spinner */}
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                {/* CSS Spinner */}
+                <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
                 <span>Generating Link...</span>
               </motion.div>
             ) : (
               <motion.span
-                key="ready"
+                key="default-state"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
