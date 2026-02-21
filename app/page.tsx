@@ -124,13 +124,41 @@ export default function Home() {
         {/* Disable button if auth isn't ready or form is loading */}
         <button
           disabled={loading || !isAuthReady}
-          className="w-full bg-black text-white font-bold py-4 rounded-xl hover:bg-zinc-800 transition cursor-pointer disabled:opacity-50 h-14"
+          className="w-full bg-black text-white font-bold py-4 rounded-xl hover:bg-zinc-800 transition cursor-pointer disabled:opacity-50 h-14 relative overflow-hidden"
         >
-          {!isAuthReady
-            ? "Initializing..."
-            : loading
-              ? "Generating Link..."
-              : "Generate Salami Link"}
+          <AnimatePresence mode="wait">
+            {!isAuthReady ? (
+              <motion.span
+                key="init"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                Initializing...
+              </motion.span>
+            ) : loading ? (
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="flex items-center justify-center gap-2"
+              >
+                {/* Simple CSS Spinner */}
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span>Generating Link...</span>
+              </motion.div>
+            ) : (
+              <motion.span
+                key="ready"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                Generate Salami Link
+              </motion.span>
+            )}
+          </AnimatePresence>
         </button>
       </motion.form>
       <AnimatePresence>
