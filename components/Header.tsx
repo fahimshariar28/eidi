@@ -48,7 +48,7 @@ export default function Header() {
             (isRealUser ? (
               <button
                 onClick={handleLogout}
-                className="bg-zinc-900 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-zinc-800 transition shadow-sm"
+                className="bg-zinc-900 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-zinc-800 transition shadow-sm cursor-pointer"
               >
                 Logout
               </button>
