@@ -19,6 +19,7 @@ export default function PaymentPage() {
   const [paid, setPaid] = useState(false);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   useEffect(() => {
     fetch(`/api/invoice/${id}`)
@@ -86,6 +87,27 @@ export default function PaymentPage() {
       </div>
     );
 
+  const copyLink = async () => {
+    await navigator.clipboard.writeText(window.location.href);
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
+  };
+
+  const shareToSponsorWhatsApp = () => {
+    const url = window.location.href;
+    const message = `Assalamu Alaikum ${invoice?.targetName}, you have a new Eidi Invoice! 💸 Please check and approve it here: ${url}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
+  };
+
+  const shareToSponsorMessenger = () => {
+    const url = window.location.href;
+    // Facebook sharer is the most reliable way to push to Messenger on mobile
+    window.open(
+      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+      "_blank",
+    );
+  };
+
   return (
     <main className="min-h-screen bg-zinc-100 flex items-center justify-center p-6 font-sans">
       <AnimatePresence mode="wait">
@@ -134,6 +156,38 @@ export default function PaymentPage() {
               <div className="p-4 bg-zinc-50 rounded-xl italic text-zinc-600 border border-zinc-100 text-sm">
                 `{invoice.message}`
               </div>
+
+              {!paid && (
+                <div className="mt-6 p-5 bg-zinc-50 rounded-2xl border border-zinc-200 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                      Send to {invoice.targetName}
+                    </p>
+                    <button
+                      onClick={copyLink}
+                      className={`text-[10px] font-bold text-blue-600 uppercase hover:underline ${!linkCopied && "cursor-pointer"} ${linkCopied ? "text-green-600" : ""}`}
+                    >
+                      {linkCopied ? "✓ Link Copied" : "Copy Link"}
+                    </button>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={shareToSponsorWhatsApp}
+                      className="flex-1 bg-[#25D366] text-white py-3 rounded-xl font-bold text-sm shadow-sm hover:brightness-105 active:scale-95 transition flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      WhatsApp
+                    </button>
+
+                    <button
+                      onClick={shareToSponsorMessenger}
+                      className="flex-1 bg-[#0084FF] text-white py-3 rounded-xl font-bold text-sm shadow-sm hover:brightness-105 active:scale-95 transition flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      Messenger
+                    </button>
+                  </div>
+                </div>
+              )}
 
               <button
                 onClick={handlePayment}
