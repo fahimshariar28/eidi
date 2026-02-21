@@ -51,33 +51,32 @@ export default function Home() {
     initAuth();
   }, []);
 
-  async function handleSubmit(formData: FormData) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+
     setLoading(true);
     try {
       const res = await createInvoiceAction(formData);
       if (res?.success) {
-        // Logic: Only show modal if user is NOT logged in or is Anonymous
         const isRealUser = session && !session.user.isAnonymous;
-
         if (isRealUser) {
-          // If logged in, skip the noise and go to the link
           router.push(`/pay/${res.id}`);
         } else {
-          // Only show the popup for "Ghosts"
           setGeneratedId(res.id);
           setShowAuthModal(true);
         }
       }
     } catch (err) {
-      console.error(err);
+      console.error("Submission Engine Failure:", err);
     } finally {
-      setLoading(false);
+      setLoading(false); // Now this is guaranteed to run after the action
     }
   }
   return (
     <main className="min-h-screen flex items-center justify-center p-4 bg-zinc-50 text-zinc-900 relative">
       <motion.form
-        action={handleSubmit}
+        onSubmit={handleSubmit}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md space-y-5 border border-zinc-100"
